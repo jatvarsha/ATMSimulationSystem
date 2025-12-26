@@ -36,3 +36,4 @@ Project Structure
 Technologies:
 Java 8+
 No external dependencies
+
