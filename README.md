@@ -17,7 +17,6 @@ PIN        Balance
 Quick Start
 # Compile
 javac *.java
-
 # Run
 java Main
 
