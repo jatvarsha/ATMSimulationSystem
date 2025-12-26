@@ -14,6 +14,7 @@ public class Transaction {
         this.timestamp = LocalDateTime.now();
     }
     
+    // --- Getters required for the Modern UI ---
     public String getType() {
         return type;
     }
@@ -30,18 +31,20 @@ public class Transaction {
         return timestamp;
     }
     
+    // --- Formatting Methods ---
     public String toFormattedString() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String formattedDateTime = timestamp.format(formatter);
         
-        return String.format("%-12s | $%-10.2f | Balance: $%-10.2f\n%s", 
+        // Updated to show Indian Rupee symbol
+        return String.format("%-12s | ₹%-10.2f | Balance: ₹%-10.2f\n%s", 
             type, amount, balanceAfter, formattedDateTime);
     }
     
     @Override
     public String toString() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        return String.format("%s - %s: $%.2f (Balance: $%.2f)", 
+        return String.format("%s - %s: ₹%.2f (Balance: ₹%.2f)", 
             timestamp.format(formatter), type, amount, balanceAfter);
     }
 }

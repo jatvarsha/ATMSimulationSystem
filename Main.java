@@ -1,476 +1,334 @@
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.HierarchyEvent;
+
+import java.time.format.DateTimeFormatter;
 
 public class Main extends JFrame {
     private ATMSystem atmSystem;
     private CardLayout cardLayout;
     private JPanel mainPanel;
     
-    // Panels for different views
-    private JPanel loginPanel;
-    private JPanel menuPanel;
-    private JPanel balancePanel;
-    private JPanel depositPanel;
-    private JPanel withdrawPanel;
-    private JPanel historyPanel;
+    // Modern "Midnight" Palette
+    private final Color NAVY_DARK = new Color(15, 23, 42);   
+    private final Color ACCENT_BLUE = new Color(59, 130, 246); 
+    private final Color CARD_WHITE = new Color(255, 255, 255);
     
-    // Components
+    private final Color TEXT_SUB = new Color(100, 116, 139);
+    private final Color SUCCESS_GREEN = new Color(34, 197, 94);
+    private final Color ERROR_RED = new Color(239, 68, 68);
+
     private JPasswordField pinField;
-    private JTextField depositAmountField;
-    private JTextField withdrawAmountField;
-    private JTextArea historyArea;
+    private JTextField depositAmountField, withdrawAmountField;
+    private JPanel historyListContainer; // Replaced JTextArea
     private JLabel balanceLabel;
-    private JLabel messageLabel;
-    
+
     public Main() {
         atmSystem = new ATMSystem();
-        
-        setTitle("ATM Simulator");
-        setSize(500, 600);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
+        setupFrame();
         
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
-        
-        createLoginPanel();
-        createMenuPanel();
-        createBalancePanel();
-        createDepositPanel();
-        createWithdrawPanel();
-        createHistoryPanel();
-        
-        mainPanel.add(loginPanel, "LOGIN");
-        mainPanel.add(menuPanel, "MENU");
-        mainPanel.add(balancePanel, "BALANCE");
-        mainPanel.add(depositPanel, "DEPOSIT");
-        mainPanel.add(withdrawPanel, "WITHDRAW");
-        mainPanel.add(historyPanel, "HISTORY");
-        
+        mainPanel.setBackground(NAVY_DARK);
+
+        mainPanel.add(createLoginPanel(), "LOGIN");
+        mainPanel.add(createMenuPanel(), "MENU");
+        mainPanel.add(createBalancePanel(), "BALANCE");
+        mainPanel.add(createDepositPanel(), "DEPOSIT");
+        mainPanel.add(createWithdrawPanel(), "WITHDRAW");
+        mainPanel.add(createHistoryPanel(), "HISTORY");
+
         add(mainPanel);
         cardLayout.show(mainPanel, "LOGIN");
     }
-    
-    private void createLoginPanel() {
-        loginPanel = new JPanel();
-        loginPanel.setLayout(new GridBagLayout());
-        loginPanel.setBackground(new Color(30, 58, 138));
-        
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        
-        JLabel titleLabel = new JLabel("ATM Simulator");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 32));
-        titleLabel.setForeground(Color.WHITE);
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 2;
-        loginPanel.add(titleLabel, gbc);
-        
-        JLabel subtitleLabel = new JLabel("Enter your PIN");
-        subtitleLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-        subtitleLabel.setForeground(new Color(200, 200, 200));
-        gbc.gridy = 1;
-        loginPanel.add(subtitleLabel, gbc);
-        
-        JPanel whitePanel = new JPanel();
-        whitePanel.setBackground(Color.WHITE);
-        whitePanel.setLayout(new GridBagLayout());
-        whitePanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        
-        GridBagConstraints whitePanelGbc = new GridBagConstraints();
-        whitePanelGbc.insets = new Insets(5, 5, 5, 5);
-        whitePanelGbc.fill = GridBagConstraints.HORIZONTAL;
-        
-        JLabel pinLabel = new JLabel("PIN:");
-        pinLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        whitePanelGbc.gridx = 0;
-        whitePanelGbc.gridy = 0;
-        whitePanel.add(pinLabel, whitePanelGbc);
-        
-        pinField = new JPasswordField(15);
-        pinField.setFont(new Font("Arial", Font.PLAIN, 18));
-        whitePanelGbc.gridy = 1;
-        whitePanel.add(pinField, whitePanelGbc);
-        
-        JButton loginButton = new JButton("Login");
-        loginButton.setFont(new Font("Arial", Font.BOLD, 14));
-        loginButton.setBackground(new Color(37, 99, 235));
-        loginButton.setForeground(Color.WHITE);
-        loginButton.setFocusPainted(false);
-        loginButton.addActionListener(e -> handleLogin());
-        whitePanelGbc.gridy = 2;
-        whitePanel.add(loginButton, whitePanelGbc);
-        
-        gbc.gridy = 2;
-        gbc.gridwidth = 2;
-        loginPanel.add(whitePanel, gbc);
-        
-        JPanel demoPanel = new JPanel();
-        demoPanel.setLayout(new BoxLayout(demoPanel, BoxLayout.Y_AXIS));
-        demoPanel.setBackground(new Color(243, 244, 246));
-        demoPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        
-        JLabel demoTitle = new JLabel("Demo Accounts:");
-        demoTitle.setFont(new Font("Arial", Font.BOLD, 12));
-        demoPanel.add(demoTitle);
-        
-        JLabel demo1 = new JLabel("PIN: 1234 ($1,000.00)");
-        demo1.setFont(new Font("Arial", Font.PLAIN, 11));
-        demoPanel.add(demo1);
-        
-        JLabel demo2 = new JLabel("PIN: 5678 ($2,500.00)");
-        demo2.setFont(new Font("Arial", Font.PLAIN, 11));
-        demoPanel.add(demo2);
-        
-        JLabel demo3 = new JLabel("PIN: 9999 ($500.00)");
-        demo3.setFont(new Font("Arial", Font.PLAIN, 11));
-        demoPanel.add(demo3);
-        
-        gbc.gridy = 3;
-        loginPanel.add(demoPanel, gbc);
+
+    private void setupFrame() {
+        setTitle("Bank India");
+        setSize(400, 700);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setResizable(false);
+        System.setProperty("awt.useSystemAAFontSettings","on");
+        System.setProperty("swing.aatext", "true");
     }
-    
-    private void createMenuPanel() {
-        menuPanel = new JPanel();
-        menuPanel.setLayout(new GridBagLayout());
-        menuPanel.setBackground(Color.WHITE);
-        
+
+    // --- SCREEN CREATION ---
+
+    private JPanel createLoginPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(NAVY_DARK);
+        panel.setBorder(new EmptyBorder(60, 40, 60, 40));
+
+        JLabel logo = new JLabel("Indian Bank", JLabel.CENTER);
+        logo.setFont(new Font("Inter", Font.BOLD, 28));
+        logo.setForeground(Color.WHITE);
+        panel.add(logo, BorderLayout.NORTH);
+
+        RoundedPanel card = new RoundedPanel(25, CARD_WHITE);
+        card.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 20, 10, 20);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 0;
+        gbc.insets = new Insets(10, 0, 10, 0); gbc.gridx = 0;
+
+        JLabel loginTitle = new JLabel("Enter your PIN");
+        loginTitle.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        loginTitle.setForeground(TEXT_SUB);
         
-        JLabel menuTitle = new JLabel("Main Menu");
-        menuTitle.setFont(new Font("Arial", Font.BOLD, 24));
-        gbc.gridy = 0;
-        menuPanel.add(menuTitle, gbc);
-        
-        messageLabel = new JLabel("");
-        messageLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-        gbc.gridy = 1;
-        menuPanel.add(messageLabel, gbc);
-        
-        JButton balanceButton = createMenuButton("Check Balance");
-        balanceButton.addActionListener(e -> showBalance());
-        gbc.gridy = 2;
-        menuPanel.add(balanceButton, gbc);
-        
-        JButton depositButton = createMenuButton("Deposit Money");
-        depositButton.addActionListener(e -> showDeposit());
-        gbc.gridy = 3;
-        menuPanel.add(depositButton, gbc);
-        
-        JButton withdrawButton = createMenuButton("Withdraw Money");
-        withdrawButton.addActionListener(e -> showWithdraw());
-        gbc.gridy = 4;
-        menuPanel.add(withdrawButton, gbc);
-        
-        JButton historyButton = createMenuButton("Transaction History");
-        historyButton.addActionListener(e -> showHistory());
-        gbc.gridy = 5;
-        menuPanel.add(historyButton, gbc);
-        
-        JButton logoutButton = new JButton("Logout");
-        logoutButton.setFont(new Font("Arial", Font.BOLD, 14));
-        logoutButton.setBackground(new Color(220, 38, 38));
-        logoutButton.setForeground(Color.WHITE);
-        logoutButton.setFocusPainted(false);
-        logoutButton.addActionListener(e -> handleLogout());
-        gbc.gridy = 6;
-        menuPanel.add(logoutButton, gbc);
+        pinField = new JPasswordField(4);
+        pinField.setFont(new Font("Monospaced", Font.BOLD, 32));
+        pinField.setHorizontalAlignment(JTextField.CENTER);
+        pinField.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, ACCENT_BLUE));
+        pinField.setPreferredSize(new Dimension(150, 50));
+
+        RoundedButton loginBtn = new RoundedButton("Secure Login", ACCENT_BLUE);
+        loginBtn.setPreferredSize(new Dimension(200, 45));
+        loginBtn.addActionListener(e -> handleLogin());
+
+        gbc.gridy = 0; card.add(loginTitle, gbc);
+        gbc.gridy = 1; card.add(pinField, gbc);
+        gbc.gridy = 2; gbc.insets = new Insets(30, 0, 10, 0); card.add(loginBtn, gbc);
+
+        panel.add(card, BorderLayout.CENTER);
+        return panel;
     }
-    
-    private void createBalancePanel() {
-        balancePanel = new JPanel();
-        balancePanel.setLayout(new GridBagLayout());
-        balancePanel.setBackground(Color.WHITE);
-        
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(20, 20, 20, 20);
-        gbc.gridx = 0;
-        
-        JLabel title = new JLabel("Current Balance");
-        title.setFont(new Font("Arial", Font.BOLD, 24));
-        gbc.gridy = 0;
-        balancePanel.add(title, gbc);
-        
-        JPanel balanceCard = new JPanel();
-        balanceCard.setBackground(new Color(37, 99, 235));
-        balanceCard.setLayout(new GridBagLayout());
-        balanceCard.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
-        balanceCard.setPreferredSize(new Dimension(400, 150));
-        
-        GridBagConstraints cardGbc = new GridBagConstraints();
-        cardGbc.gridx = 0;
-        
-        JLabel balanceText = new JLabel("Available Balance");
-        balanceText.setFont(new Font("Arial", Font.PLAIN, 14));
-        balanceText.setForeground(new Color(200, 200, 255));
-        cardGbc.gridy = 0;
-        balanceCard.add(balanceText, cardGbc);
-        
-        balanceLabel = new JLabel("$0.00");
-        balanceLabel.setFont(new Font("Arial", Font.BOLD, 36));
+
+    private JPanel createMenuPanel() {
+        JPanel panel = new JPanel(new BorderLayout(0, 20));
+        panel.setBackground(NAVY_DARK);
+        panel.setBorder(new EmptyBorder(40, 25, 40, 25));
+
+        JLabel title = new JLabel("Banking Services", JLabel.LEFT);
+        title.setFont(new Font("SansSerif", Font.BOLD, 24));
+        title.setForeground(Color.WHITE);
+        panel.add(title, BorderLayout.NORTH);
+
+        JPanel grid = new JPanel(new GridLayout(4, 1, 0, 15));
+        grid.setOpaque(false);
+        grid.add(createListButton("Current Balance", "View funds in ₹", e -> showBalance()));
+        grid.add(createListButton("Deposit", "Add money to account", e -> showDeposit()));
+        grid.add(createListButton("Withdraw", "Withdraw cash instantly", e -> showWithdraw()));
+        grid.add(createListButton("History", "View passbook activity", e -> showHistory()));
+
+        panel.add(grid, BorderLayout.CENTER);
+
+        JButton logout = new JButton("Secure Logout");
+        logout.setForeground(new Color(248, 113, 113));
+        logout.setContentAreaFilled(false);
+        logout.setBorderPainted(false);
+        logout.addActionListener(e -> handleLogout());
+        panel.add(logout, BorderLayout.SOUTH);
+
+        return panel;
+    }
+
+    private JPanel createBalancePanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(NAVY_DARK);
+        panel.setBorder(new EmptyBorder(40, 25, 40, 25));
+
+        balanceLabel = new JLabel("₹ 0.00", JLabel.CENTER);
+        balanceLabel.setFont(new Font("SansSerif", Font.BOLD, 42));
         balanceLabel.setForeground(Color.WHITE);
-        cardGbc.gridy = 1;
-        balanceCard.add(balanceLabel, cardGbc);
-        
-        gbc.gridy = 1;
-        balancePanel.add(balanceCard, gbc);
-        
-        JButton backButton = new JButton("Back to Menu");
-        backButton.setFont(new Font("Arial", Font.BOLD, 14));
-        backButton.setBackground(new Color(156, 163, 175));
-        backButton.setForeground(Color.WHITE);
-        backButton.setFocusPainted(false);
-        backButton.addActionListener(e -> cardLayout.show(mainPanel, "MENU"));
-        gbc.gridy = 2;
-        balancePanel.add(backButton, gbc);
+
+        JLabel sub = new JLabel("Available Balance", JLabel.CENTER);
+        sub.setForeground(TEXT_SUB);
+
+        JPanel center = new JPanel(new GridLayout(2,1));
+        center.setOpaque(false);
+        center.add(sub); center.add(balanceLabel);
+
+        panel.add(center, BorderLayout.CENTER);
+
+        RoundedButton back = new RoundedButton("Back to Menu", Color.GRAY);
+        back.addActionListener(e -> cardLayout.show(mainPanel, "MENU"));
+        panel.add(back, BorderLayout.SOUTH);
+
+        return panel;
     }
-    
-    private void createDepositPanel() {
-        depositPanel = new JPanel();
-        depositPanel.setLayout(new GridBagLayout());
-        depositPanel.setBackground(Color.WHITE);
-        
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 20, 10, 20);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 0;
-        
-        JLabel title = new JLabel("Deposit Money");
-        title.setFont(new Font("Arial", Font.BOLD, 24));
-        gbc.gridy = 0;
-        gbc.gridwidth = 2;
-        depositPanel.add(title, gbc);
-        
-        JLabel amountLabel = new JLabel("Amount:");
-        amountLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        gbc.gridy = 1;
-        gbc.gridwidth = 1;
-        depositPanel.add(amountLabel, gbc);
-        
-        depositAmountField = new JTextField(20);
-        depositAmountField.setFont(new Font("Arial", Font.PLAIN, 18));
-        gbc.gridy = 2;
-        gbc.gridwidth = 2;
-        depositPanel.add(depositAmountField, gbc);
-        
-        JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 10, 0));
-        
-        JButton cancelButton = new JButton("Cancel");
-        cancelButton.setFont(new Font("Arial", Font.BOLD, 14));
-        cancelButton.setBackground(new Color(156, 163, 175));
-        cancelButton.setForeground(Color.WHITE);
-        cancelButton.setFocusPainted(false);
-        cancelButton.addActionListener(e -> {
-            depositAmountField.setText("");
-            cardLayout.show(mainPanel, "MENU");
+
+    private JPanel createHistoryPanel() {
+        JPanel panel = new JPanel(new BorderLayout(0, 15));
+        panel.setBackground(NAVY_DARK);
+        panel.setBorder(new EmptyBorder(30, 25, 30, 25));
+
+        JLabel title = new JLabel("Recent Activity", JLabel.LEFT);
+        title.setFont(new Font("SansSerif", Font.BOLD, 22));
+        title.setForeground(Color.WHITE);
+        panel.add(title, BorderLayout.NORTH);
+
+        // Container for the transaction rows
+        historyListContainer = new JPanel();
+        historyListContainer.setLayout(new BoxLayout(historyListContainer, BoxLayout.Y_AXIS));
+        historyListContainer.setBackground(NAVY_DARK);
+
+        JScrollPane scroll = new JScrollPane(historyListContainer);
+        scroll.setBorder(null);
+        scroll.getViewport().setBackground(NAVY_DARK);
+        scroll.getVerticalScrollBar().setPreferredSize(new Dimension(0, 0)); // Hide scrollbar for "app" look
+        panel.add(scroll, BorderLayout.CENTER);
+
+        RoundedButton back = new RoundedButton("Back to Menu", Color.GRAY);
+        back.addActionListener(e -> cardLayout.show(mainPanel, "MENU"));
+        panel.add(back, BorderLayout.SOUTH);
+
+        // This triggers a refresh whenever the screen becomes visible
+        panel.addHierarchyListener(e -> {
+            if ((e.getChangeFlags() & HierarchyEvent.SHOWING_CHANGED) != 0 && panel.isShowing()) {
+                refreshHistoryUI();
+            }
         });
-        buttonPanel.add(cancelButton);
-        
-        JButton depositButton = new JButton("Deposit");
-        depositButton.setFont(new Font("Arial", Font.BOLD, 14));
-        depositButton.setBackground(new Color(34, 197, 94));
-        depositButton.setForeground(Color.WHITE);
-        depositButton.setFocusPainted(false);
-        depositButton.addActionListener(e -> handleDeposit());
-        buttonPanel.add(depositButton);
-        
-        gbc.gridy = 3;
-        depositPanel.add(buttonPanel, gbc);
+
+        return panel;
     }
-    
-    private void createWithdrawPanel() {
-        withdrawPanel = new JPanel();
-        withdrawPanel.setLayout(new GridBagLayout());
-        withdrawPanel.setBackground(Color.WHITE);
+
+    // --- HELPERS & LOGIC ---
+
+    private void refreshHistoryUI() {
+        historyListContainer.removeAll();
+        java.util.List<Transaction> transactions = atmSystem.getHistoryList();
         
+        // Loop backwards to show newest transactions first
+        for (int i = transactions.size() - 1; i >= 0; i--) {
+            historyListContainer.add(createTransactionRow(transactions.get(i)));
+            historyListContainer.add(Box.createRigidArea(new Dimension(0, 10)));
+        }
+        historyListContainer.revalidate();
+        historyListContainer.repaint();
+    }
+
+    private JPanel createTransactionRow(Transaction t) {
+        RoundedPanel row = new RoundedPanel(15, new Color(30, 41, 59));
+        row.setLayout(new BorderLayout());
+        row.setMaximumSize(new Dimension(400, 75));
+        row.setBorder(new EmptyBorder(10, 15, 10, 15));
+
+        // Type and Date
+        JPanel left = new JPanel(new GridLayout(2, 1));
+        left.setOpaque(false);
+        JLabel type = new JLabel(t.getType());
+        type.setFont(new Font("SansSerif", Font.BOLD, 14));
+        type.setForeground(Color.WHITE);
+        
+        JLabel date = new JLabel(t.getTimestamp().format(DateTimeFormatter.ofPattern("dd MMM, hh:mm a")));
+        date.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        date.setForeground(TEXT_SUB);
+        left.add(type); left.add(date);
+
+        // Amount (Indian Rupees)
+        boolean isCredit = t.getType().equals("DEPOSIT") || t.getType().equals("INITIAL");
+        JLabel amt = new JLabel((isCredit ? "+ ₹" : "- ₹") + String.format("%.2f", t.getAmount()));
+        amt.setFont(new Font("SansSerif", Font.BOLD, 15));
+        amt.setForeground(isCredit ? SUCCESS_GREEN : ERROR_RED);
+
+        row.add(left, BorderLayout.WEST);
+        row.add(amt, BorderLayout.EAST);
+        return row;
+    }
+
+    private JPanel createListButton(String title, String sub, java.awt.event.ActionListener action) {
+        RoundedPanel p = new RoundedPanel(15, new Color(30, 41, 59));
+        p.setLayout(new BorderLayout());
+        JButton b = new JButton("<html><div style='padding-left:15px;'><b style='color:white;'>" + title + "</b><br><span style='color:#94a3b8; font-size:10px;'>" + sub + "</span></div></html>");
+        b.setHorizontalAlignment(SwingConstants.LEFT);
+        b.setContentAreaFilled(false); b.setBorderPainted(false); b.setFocusPainted(false);
+        b.addActionListener(action);
+        p.add(b, BorderLayout.CENTER);
+        return p;
+    }
+
+    private JPanel createTransactionPanel(String titleStr, JTextField field, java.awt.event.ActionListener action) {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(NAVY_DARK);
+        panel.setBorder(new EmptyBorder(80, 40, 80, 40));
+        RoundedPanel card = new RoundedPanel(25, CARD_WHITE);
+        card.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 20, 10, 20);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 0;
-        
-        JLabel title = new JLabel("Withdraw Money");
-        title.setFont(new Font("Arial", Font.BOLD, 24));
-        gbc.gridy = 0;
-        gbc.gridwidth = 2;
-        withdrawPanel.add(title, gbc);
-        
-        JLabel amountLabel = new JLabel("Amount:");
-        amountLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        gbc.gridy = 1;
-        gbc.gridwidth = 1;
-        withdrawPanel.add(amountLabel, gbc);
-        
-        withdrawAmountField = new JTextField(20);
-        withdrawAmountField.setFont(new Font("Arial", Font.PLAIN, 18));
-        gbc.gridy = 2;
-        gbc.gridwidth = 2;
-        withdrawPanel.add(withdrawAmountField, gbc);
-        
-        JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 10, 0));
-        
-        JButton cancelButton = new JButton("Cancel");
-        cancelButton.setFont(new Font("Arial", Font.BOLD, 14));
-        cancelButton.setBackground(new Color(156, 163, 175));
-        cancelButton.setForeground(Color.WHITE);
-        cancelButton.setFocusPainted(false);
-        cancelButton.addActionListener(e -> {
-            withdrawAmountField.setText("");
-            cardLayout.show(mainPanel, "MENU");
-        });
-        buttonPanel.add(cancelButton);
-        
-        JButton withdrawButton = new JButton("Withdraw");
-        withdrawButton.setFont(new Font("Arial", Font.BOLD, 14));
-        withdrawButton.setBackground(new Color(249, 115, 22));
-        withdrawButton.setForeground(Color.WHITE);
-        withdrawButton.setFocusPainted(false);
-        withdrawButton.addActionListener(e -> handleWithdraw());
-        buttonPanel.add(withdrawButton);
-        
-        gbc.gridy = 3;
-        withdrawPanel.add(buttonPanel, gbc);
+        gbc.insets = new Insets(10,10,10,10); gbc.gridx = 0;
+
+        JLabel l = new JLabel(titleStr); l.setForeground(TEXT_SUB);
+        field.setFont(new Font("SansSerif", Font.BOLD, 28));
+        field.setHorizontalAlignment(JTextField.CENTER);
+        field.setPreferredSize(new Dimension(200, 50));
+        field.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.LIGHT_GRAY));
+
+        RoundedButton btn = new RoundedButton("Confirm Transaction", ACCENT_BLUE);
+        btn.setPreferredSize(new Dimension(220, 45));
+        btn.addActionListener(action);
+
+        JButton cancel = new JButton("Cancel");
+        cancel.setForeground(TEXT_SUB);
+        cancel.addActionListener(e -> cardLayout.show(mainPanel, "MENU"));
+
+        gbc.gridy = 0; card.add(l, gbc);
+        gbc.gridy = 1; card.add(field, gbc);
+        gbc.gridy = 2; gbc.insets = new Insets(20,0,5,0); card.add(btn, gbc);
+        gbc.gridy = 3; card.add(cancel, gbc);
+
+        panel.add(card, BorderLayout.CENTER);
+        return panel;
     }
-    
-    private void createHistoryPanel() {
-        historyPanel = new JPanel();
-        historyPanel.setLayout(new GridBagLayout());
-        historyPanel.setBackground(Color.WHITE);
-        
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 20, 10, 20);
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.gridx = 0;
-        
-        JLabel title = new JLabel("Transaction History");
-        title.setFont(new Font("Arial", Font.BOLD, 24));
-        gbc.gridy = 0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        historyPanel.add(title, gbc);
-        
-        historyArea = new JTextArea(20, 40);
-        historyArea.setEditable(false);
-        historyArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
-        JScrollPane scrollPane = new JScrollPane(historyArea);
-        scrollPane.setPreferredSize(new Dimension(450, 400));
-        gbc.gridy = 1;
-        gbc.weighty = 1.0;
-        gbc.fill = GridBagConstraints.BOTH;
-        historyPanel.add(scrollPane, gbc);
-        
-        JButton backButton = new JButton("Back to Menu");
-        backButton.setFont(new Font("Arial", Font.BOLD, 14));
-        backButton.setBackground(new Color(156, 163, 175));
-        backButton.setForeground(Color.WHITE);
-        backButton.setFocusPainted(false);
-        backButton.addActionListener(e -> cardLayout.show(mainPanel, "MENU"));
-        gbc.gridy = 2;
-        gbc.weighty = 0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        historyPanel.add(backButton, gbc);
-    }
-    
-    private JButton createMenuButton(String text) {
-        JButton button = new JButton(text);
-        button.setFont(new Font("Arial", Font.BOLD, 16));
-        button.setPreferredSize(new Dimension(300, 50));
-        button.setBackground(new Color(219, 234, 254));
-        button.setFocusPainted(false);
-        return button;
-    }
-    
+
+    // --- UPDATED LOGIC HANDLERS ---
     private void handleLogin() {
-        String pin = new String(pinField.getPassword());
-        if (atmSystem.login(pin)) {
-            pinField.setText("");
-            showMessage("Login successful!", new Color(34, 197, 94));
-            cardLayout.show(mainPanel, "MENU");
-        } else {
-            JOptionPane.showMessageDialog(this, "Invalid PIN. Please try again.", 
-                "Login Failed", JOptionPane.ERROR_MESSAGE);
-            pinField.setText("");
+        if (atmSystem.login(new String(pinField.getPassword()))) {
+            pinField.setText(""); cardLayout.show(mainPanel, "MENU");
+        } else { JOptionPane.showMessageDialog(this, "Invalid Security PIN"); }
+    }
+    private void showBalance() { 
+        balanceLabel.setText(String.format("₹ %.2f", atmSystem.getCurrentBalance())); 
+        cardLayout.show(mainPanel, "BALANCE"); 
+    }
+    private void showDeposit() { depositAmountField.setText(""); cardLayout.show(mainPanel, "DEPOSIT"); }
+    private void showWithdraw() { withdrawAmountField.setText(""); cardLayout.show(mainPanel, "WITHDRAW"); }
+    private void showHistory() { cardLayout.show(mainPanel, "HISTORY"); }
+    private void handleLogout() { atmSystem.logout(); cardLayout.show(mainPanel, "LOGIN"); }
+    
+    private void handleDeposit() { 
+        try { 
+            double amt = Double.parseDouble(depositAmountField.getText());
+            if(atmSystem.deposit(amt)) showBalance(); 
+            else JOptionPane.showMessageDialog(this, "Enter valid amount");
+        } catch(Exception e){ JOptionPane.showMessageDialog(this, "Numbers only"); }
+    }
+    private void handleWithdraw() { 
+        try { 
+            double amt = Double.parseDouble(withdrawAmountField.getText());
+            if(atmSystem.withdraw(amt)) showBalance(); 
+            else JOptionPane.showMessageDialog(this, "Insufficient Balance");
+        } catch(Exception e){ JOptionPane.showMessageDialog(this, "Numbers only"); }
+    }
+
+    // --- STYLING HELPERS ---
+    class RoundedPanel extends JPanel {
+        private int r; Color c;
+        RoundedPanel(int r, Color c) { this.r = r; this.c = c; setOpaque(false); }
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(c); g2.fillRoundRect(0, 0, getWidth(), getHeight(), r, r);
         }
     }
-    
-    private void showBalance() {
-        double balance = atmSystem.getCurrentBalance();
-        balanceLabel.setText(String.format("$%.2f", balance));
-        cardLayout.show(mainPanel, "BALANCE");
-    }
-    
-    private void showDeposit() {
-        depositAmountField.setText("");
-        cardLayout.show(mainPanel, "DEPOSIT");
-    }
-    
-    private void showWithdraw() {
-        withdrawAmountField.setText("");
-        cardLayout.show(mainPanel, "WITHDRAW");
-    }
-    
-    private void handleDeposit() {
-        try {
-            double amount = Double.parseDouble(depositAmountField.getText());
-            if (atmSystem.deposit(amount)) {
-                depositAmountField.setText("");
-                showMessage("Deposit successful!", new Color(34, 197, 94));
-                cardLayout.show(mainPanel, "MENU");
-            } else {
-                JOptionPane.showMessageDialog(this, "Invalid amount. Please enter a positive number.", 
-                    "Deposit Failed", JOptionPane.ERROR_MESSAGE);
-            }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Please enter a valid number.", 
-                "Invalid Input", JOptionPane.ERROR_MESSAGE);
+
+    class RoundedButton extends JButton {
+        Color c;
+        RoundedButton(String text, Color c) {
+            super(text); this.c = c; setOpaque(false); setContentAreaFilled(false);
+            setBorderPainted(false); setFocusPainted(false); setForeground(Color.WHITE);
+            setFont(new Font("SansSerif", Font.BOLD, 14)); setCursor(new Cursor(Cursor.HAND_CURSOR));
+        }
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(getModel().isPressed() ? c.darker() : c);
+            g2.fillRoundRect(0,0,getWidth(),getHeight(), 15, 15);
+            super.paintComponent(g);
         }
     }
-    
-    private void handleWithdraw() {
-        try {
-            double amount = Double.parseDouble(withdrawAmountField.getText());
-            if (atmSystem.withdraw(amount)) {
-                withdrawAmountField.setText("");
-                showMessage("Withdrawal successful!", new Color(34, 197, 94));
-                cardLayout.show(mainPanel, "MENU");
-            } else {
-                JOptionPane.showMessageDialog(this, 
-                    "Insufficient funds or invalid amount.", 
-                    "Withdrawal Failed", JOptionPane.ERROR_MESSAGE);
-            }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Please enter a valid number.", 
-                "Invalid Input", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-    
-    private void showHistory() {
-        String history = atmSystem.getTransactionHistory();
-        historyArea.setText(history);
-        cardLayout.show(mainPanel, "HISTORY");
-    }
-    
-    private void handleLogout() {
-        atmSystem.logout();
-        messageLabel.setText("");
-        cardLayout.show(mainPanel, "LOGIN");
-    }
-    
-    private void showMessage(String message, Color color) {
-        messageLabel.setText(message);
-        messageLabel.setForeground(color);
-        Timer timer = new Timer(3000, e -> messageLabel.setText(""));
-        timer.setRepeats(false);
-        timer.start();
-    }
-    
+
+    private JPanel createDepositPanel() { return createTransactionPanel("Amount to Deposit", depositAmountField = new JTextField(), e -> handleDeposit()); }
+    private JPanel createWithdrawPanel() { return createTransactionPanel("Amount to Withdraw", withdrawAmountField = new JTextField(), e -> handleWithdraw()); }
+
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            Main frame = new Main();
-            frame.setVisible(true);
-        });
+        SwingUtilities.invokeLater(() -> new Main().setVisible(true));
     }
 }

@@ -1,5 +1,7 @@
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 public class ATMSystem {
     private Map<String, Account> accounts;
@@ -7,11 +9,19 @@ public class ATMSystem {
     
     public ATMSystem() {
         accounts = new HashMap<>();
-        // Initialize demo accounts
-        accounts.put("1234", new Account("1234", 1000.00));
-        accounts.put("5678", new Account("5678", 2500.00));
-        accounts.put("9999", new Account("9999", 500.00));
+        // Updated demo accounts to reflect standard Rupee balances
+        accounts.put("1234", new Account("1234", 15000.00));
+        accounts.put("5678", new Account("5678", 25000.00));
+        accounts.put("9999", new Account("9999", 5000.00));
         currentAccount = null;
+    }
+
+    /**
+     * Returns the raw list of transactions for the modern UI history feed.
+     */
+    public List<Transaction> getHistoryList() {
+        if (currentAccount == null) return new ArrayList<>();
+        return currentAccount.getTransactionHistory();
     }
     
     public boolean login(String pin) {
